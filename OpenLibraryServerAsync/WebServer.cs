@@ -19,13 +19,11 @@ namespace OpenLibraryServer.P2
         private volatile bool _running;
         private readonly object _consoleLock = new object();
 
-        // Neophodno: async HTTP klijent + keš
         private readonly OpenLibraryClient _client = new OpenLibraryClient();
         private readonly ResponseCache _cache = new ResponseCache(TimeSpan.FromMinutes(5));
 
         public WebServer(string prefix) => _listener.Prefixes.Add(prefix);
 
-        // Accept: klasična nit (blokirajući GetContext)
         public void Start()
         {
             _listener.Start();
@@ -46,7 +44,7 @@ namespace OpenLibraryServer.P2
                 HttpListenerContext ctx = null;
                 try
                 {
-                    ctx = _listener.GetContext(); // blokira dok ne dođe zahtev
+                    ctx = _listener.GetContext(); 
                 }
                 catch (ObjectDisposedException) { break; }
                 catch (HttpListenerException) { break; }
@@ -54,7 +52,6 @@ namespace OpenLibraryServer.P2
 
                 if (ctx == null) continue;
 
-                // Obrada: Task/async (ThreadPool)
                 _ = Task.Run(() => HandleRequestAsync(ctx));
             }
         }
@@ -95,7 +92,6 @@ namespace OpenLibraryServer.P2
                 {
                     var qs = HttpUtility.ParseQueryString(req.Url.Query);
 
-                    // 1) Whitelist prosleđenih parametara
                     var forward = BuildForward(qs);
                     bool wantHtml = string.Equals(qs["format"], "html", StringComparison.OrdinalIgnoreCase);
 
@@ -109,7 +105,6 @@ namespace OpenLibraryServer.P2
                         return;
                     }
 
-                    // 2) Keširanje po (sortiranom) query + formatu
                     var cacheKey = BuildCacheKey(forward, wantHtml);
                     if (_cache.TryGet(cacheKey, out var cached))
                     {
@@ -117,10 +112,8 @@ namespace OpenLibraryServer.P2
                         return;
                     }
 
-                    // 3) LIVE poziv (async) ka Open Library
                     var proj = await FetchProjectionAsync(forward).ConfigureAwait(false);
 
-                    // 4) Render + upis u keš
                     byte[] payload;
                     string contentType;
 
@@ -193,13 +186,13 @@ namespace OpenLibraryServer.P2
             }
         }
 
-        // ---------- Model / fetch ----------
+       
 
         private sealed class BookItem
         {
             public string Title { get; set; }
-            public string Author { get; set; } // prvi autor
-            public System.Collections.Generic.List<string> Authors { get; set; } // svi autori
+            public string Author { get; set; } //prvi autor
+            public System.Collections.Generic.List<string> Authors { get; set; } //svi autori
             public int? FirstYear { get; set; }
             public string WorkKey { get; set; }
         }
@@ -299,7 +292,7 @@ namespace OpenLibraryServer.P2
         {
             string H(string s) => HttpUtility.HtmlEncode(s ?? "");
 
-            // priprema tokena za bold autora
+            
             proj.Query.TryGetValue("author", out var authorFilter);
             var tokens = SplitAuthorFilter(authorFilter);
 
@@ -380,7 +373,7 @@ namespace OpenLibraryServer.P2
 </html>";
         }
 
-        // ---------- Async write helpers ----------
+        
 
         private static async Task WriteTextAsync(HttpListenerContext ctx, int status, string text, string contentType)
         {
@@ -409,7 +402,7 @@ namespace OpenLibraryServer.P2
             await ctx.Response.OutputStream.FlushAsync().ConfigureAwait(false);
         }
 
-        // ---------- Landing (forma + primeri) ----------
+        
 
         private static string BuildLandingHtml()
         {
