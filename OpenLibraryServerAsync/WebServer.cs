@@ -402,58 +402,38 @@ namespace OpenLibraryServer.P2
             await ctx.Response.OutputStream.FlushAsync().ConfigureAwait(false);
         }
 
-        
+
 
         private static string BuildLandingHtml()
         {
             return @"<!doctype html>
-<html lang=""en"">
+<html lang=""sr"">
 <meta charset=""utf-8""/>
-<title>OpenLibrary Server P2 (Tasks/Async - Minimal)</title>
+<title>OpenLibrary Server</title>
 <style>
  body { font-family: Segoe UI, Arial, sans-serif; margin: 2rem; line-height:1.5 }
- input,select { padding:.35rem; font-size:1rem; }
- .row { margin:.5rem 0 }
  code { background:#f5f5f5; padding:.15rem .35rem; border-radius:.25rem }
- small { color:#666 }
+ ul { margin-top: .75rem }
 </style>
 
-<h1>OpenLibrary Server — P2 (Tasks/Async - Minimal)</h1>
+<h1>OpenLibrary Server</h1>
 <p>
-  Obavezni elementi: <code>/search</code> (Open Library), <code>/health</code>, keš u memoriji, logovanje, 
-  Task/async za I/O i klasična nit za accept.
+  Endpointi: <code>/search</code> i <code>/health</code>. 
+  Dodaj <code>&format=html</code> za HTML prikaz rezultata.
 </p>
 
 <h2>Primeri</h2>
 <ul>
-  <li><a href=""/search?author=tolkien&limit=5"">/search?author=tolkien&limit=5</a></li>
-  <li><a href=""/search?author=tolkien&limit=5&format=html"">/search?author=tolkien&limit=5&format=html</a></li>
+  <li><a href=""/search?author=tolkien&sort=new"">/search?author=tolkien&sort=new</a></li>
   <li><a href=""/search?q=harry%20potter&limit=5"">/search?q=harry%20potter&limit=5</a></li>
-  <li>Health: <a href=""/health"">/health</a></li>
+  <li><a href=""/search?title=the%20lord%20of%20the%20rings&page=2"">/search?title=the%20lord%20of%20the%20rings&page=2</a></li>
+  <li><a href=""/health"">/health</a></li>
 </ul>
 
-<h2>Probaj ovde</h2>
-<form method=""get"" action=""/search"">
-  <div class=""row"">q: <input name=""q"" placeholder=""free text""/></div>
-  <div class=""row"">author: <input name=""author"" placeholder=""npr. tolkien""/></div>
-  <div class=""row"">title: <input name=""title"" placeholder=""npr. dune""/></div>
-  <div class=""row"">subject: <input name=""subject"" placeholder=""optional""/></div>
-  <div class=""row"">
-    sort:
-    <select name=""sort"">
-      <option value="""">(default)</option>
-      <option>new</option><option>old</option><option>random</option><option>key</option>
-    </select>
-    page: <input name=""page"" type=""number"" min=""1"" style=""width:5rem""/>
-    limit: <input name=""limit"" type=""number"" min=""1"" max=""100"" value=""20"" style=""width:5rem""/>
-  </div>
-  <div class=""row"">
-    <label><input type=""checkbox"" name=""format"" value=""html""> HTML view</label>
-  </div>
-  <button type=""submit"">Search</button>
-</form>
 </html>";
         }
+
+
 
         private void SafeLog(string line)
         {
